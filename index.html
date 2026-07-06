@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#0a0a0a"/>
+<title>Премиум-лендинг почти без кода — гайд · Claude Кодыч</title>
+<meta name="description" content="Практический разбор на живом примере: как собран этот самый лендинг. Процесс из 5 шагов, реальные инструменты и скилы, готовые промты, честные затыки."/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Премиум-лендинг почти без кода — гайд"/>
+<meta property="og:description" content="Как собран этот лендинг: премиум-скролл, инструменты, промты. Блоки — из 21st.dev по MCP."/>
+<meta property="og:url" content="https://mgromov688-boop.github.io/guide/"/>
+<meta property="og:locale" content="ru_RU"/>
+<link rel="canonical" href="https://mgromov688-boop.github.io/guide/"/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230a0a0a%22/%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2226%22 fill=%22%23ff6a1a%22/%3E%3C/svg%3E"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script><style>
+:root{
+  --bg:#0a0a0a; --surface:#141414; --surface2:#171717;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --txt:#ecebe9; --muted:#a29d97; --muted2:#726d68;
+  --orange:#ff6a1a; --amber:#ffb84d;
+  --mono:'JetBrains Mono',monospace; --sans:'Geist','Inter',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::selection{background:var(--orange);color:#0a0a0a}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);font-weight:600}
+.muted{color:var(--muted)}
+h1,h2,h3{font-weight:800;letter-spacing:-.03em;line-height:1.08}
+.orange{color:var(--orange)}
+
+/* neuro shader canvas (adapted from 21st.dev @thanh — Interactive Neural Vortex — recolored, via MCP) */
+#neuro{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.9}
+.below{position:relative;z-index:2;background:var(--bg)}
+
+#bar{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--orange),var(--amber));z-index:100;transition:width .1s linear}
+
+nav{position:fixed;top:18px;left:0;right:0;z-index:90;pointer-events:none}
+nav .wrap{width:100%;display:flex;justify-content:space-between;align-items:center}
+.pill{pointer-events:auto;display:inline-flex;align-items:center;gap:9px;background:rgba(14,14,14,.72);backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:100px;padding:9px 16px;font-size:14px;font-weight:600}
+.pill .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 12px var(--orange)}
+.nav-cta{pointer-events:auto;display:inline-flex;gap:7px;background:var(--orange);color:#0a0a0a;font-weight:700;font-size:13px;border-radius:100px;padding:10px 18px;transition:box-shadow .2s,transform .2s}
+.nav-cta:hover{box-shadow:0 0 28px rgba(255,106,26,.45);transform:translateY(-1px)}
+
+/* hero over shader */
+.hero{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:150px 0 96px;overflow:hidden;background:transparent}
+.hero-scrim{position:absolute;inset:0;z-index:0;pointer-events:none;background:
+  radial-gradient(880px 540px at 50% 42%,transparent,rgba(10,10,10,.48) 74%),
+  linear-gradient(180deg,rgba(10,10,10,.34),rgba(10,10,10,.10) 24%,rgba(10,10,10,.5) 68%,#0a0a0a)}
+.hero-center{position:relative;z-index:1;max-width:880px;margin:0 auto;display:flex;flex-direction:column;align-items:center}
+.hero h1{font-size:clamp(42px,7vw,86px);margin:22px 0 20px;letter-spacing:-.035em}
+.hero .sub{font-size:clamp(17px,1.6vw,21px);color:#cfcac4;max-width:56ch;margin-bottom:26px}
+.chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-bottom:30px}
+.chip{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:100px;padding:6px 13px;background:rgba(12,12,12,.5);backdrop-filter:blur(6px)}
+.chip b{color:var(--txt);font-weight:600}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--orange);color:#0a0a0a;font-weight:700;font-size:16px;border-radius:14px;padding:16px 26px;transition:box-shadow .25s,transform .2s}
+.cta:hover{box-shadow:0 0 40px rgba(255,106,26,.5);transform:translateY(-2px)}
+.cta.ghost{background:rgba(12,12,12,.45);color:var(--txt);border:1px solid var(--line2);backdrop-filter:blur(6px)}
+.cta.ghost:hover{border-color:var(--orange);color:var(--orange)}
+.hero-credit{margin-top:28px;font-family:var(--mono);font-size:12px;color:var(--muted2)}
+.hero-credit b{color:var(--amber);font-weight:500}
+
+section{position:relative;padding:96px 0}
+.shead{max-width:46ch;margin-bottom:52px}
+.shead h2{font-size:clamp(30px,4vw,48px);margin:14px 0 14px}
+.shead p{color:var(--muted);font-size:17px}
+.reveal{opacity:0;transform:translateY(38px) scale(.975);filter:blur(7px)}
+.stagger>*{opacity:0;transform:translateY(48px) scale(.965);will-change:transform,opacity}
+
+.selfref{border:1px solid var(--line);border-radius:16px;background:linear-gradient(120deg,rgba(255,106,26,.06),transparent 60%),var(--surface);padding:26px 30px;display:flex;gap:18px;align-items:flex-start}
+.selfref .i{font-family:var(--mono);font-size:11px;color:var(--orange);border:1px solid rgba(255,106,26,.4);border-radius:8px;padding:6px 10px;flex:none;letter-spacing:.1em}
+.selfref p{color:var(--muted);font-size:15px}
+.selfref p b{color:var(--txt);font-weight:600}
+
+.mind{border:1px solid var(--line);border-left:2px solid var(--orange);border-radius:14px;background:var(--surface);padding:34px 36px}
+.mind h3{font-size:clamp(22px,2.6vw,30px);margin-bottom:12px}
+.mind p{color:var(--muted);font-size:17px;max-width:60ch}
+
+.step{display:grid;grid-template-columns:64px 1fr;gap:26px;padding:34px 0;border-top:1px solid var(--line)}
+.step:last-child{border-bottom:1px solid var(--line)}
+.step .num{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--orange);border:1px solid var(--line2);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center}
+.step.core .num{background:rgba(255,106,26,.1);border-color:var(--orange)}
+.step h3{font-size:clamp(21px,2.5vw,27px);margin-bottom:6px}
+.step .goal{color:var(--muted);font-size:16px;margin-bottom:16px;max-width:64ch}
+.step .badge{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);border:1px solid rgba(255,184,77,.35);border-radius:6px;padding:3px 8px;margin-bottom:12px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.tool{font-family:var(--mono);font-size:12px;color:var(--txt);background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;padding:6px 11px}
+.tool span{color:var(--muted)}
+
+.term{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0c0c0c}
+.term .th{display:flex;align-items:center;gap:8px;padding:9px 13px;border-bottom:1px solid var(--line);background:#101010}
+.term .th .d{width:9px;height:9px;border-radius:50%;background:#242424}
+.term .th .t{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-left:6px}
+.term .copy{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer;transition:.15s}
+.term .copy:hover{color:var(--orange);border-color:var(--orange)}
+.term pre{padding:16px 18px;font-family:var(--mono);font-size:13px;line-height:1.65;color:#d6d3cf;white-space:pre-wrap;overflow-x:auto}
+.term pre .c{color:var(--orange)}
+
+/* 3D scroll flythrough */
+.scroll3d{position:relative;min-height:340vh;background:#08080a}
+.s3-sticky{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#tunnel{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+.s3-vig{position:absolute;inset:0;pointer-events:none;z-index:1;background:radial-gradient(circle at 50% 50%,transparent 28%,rgba(8,8,10,.72) 90%)}
+.s3-cap{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;max-width:680px;padding:0 24px;z-index:2;pointer-events:none;opacity:0}
+.s3-cap .eyebrow{display:block;margin-bottom:12px}
+.s3-cap h2{font-size:clamp(30px,5vw,58px);margin-bottom:14px}
+.s3-cap p{color:#cfcac4;font-size:clamp(16px,1.7vw,20px)}
+.s3-cap::before{content:"";position:absolute;inset:-64px -100px;z-index:-1;background:radial-gradient(ellipse at center,rgba(8,8,10,.92),rgba(8,8,10,.72) 42%,transparent 76%);filter:blur(16px)}
+.s3-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:2;font-family:var(--mono);font-size:11px;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase}
+
+/* stats */
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:26px 22px;text-align:center}
+.stat .v{font-size:clamp(34px,5vw,52px);font-weight:800;letter-spacing:-.04em;color:var(--orange);line-height:1}
+.stat .l{color:var(--muted);font-size:13px;margin-top:8px}
+
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.tcard{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:22px;transition:transform .12s,border-color .2s;transform-style:preserve-3d;will-change:transform}
+.tcard:hover{border-color:rgba(255,106,26,.4)}
+.tcard .n{font-family:var(--mono);font-size:14px;color:var(--orange);font-weight:600;margin-bottom:7px}
+.tcard .d{color:var(--muted);font-size:14px}
+.tcard .tag{font-family:var(--mono);font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+
+.mgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.mcard{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:24px;position:relative}
+.mcard::before{content:"";position:absolute;left:0;top:22px;bottom:22px;width:2px;background:var(--orange);border-radius:2px}
+.mcard h4{font-size:17px;font-weight:700;margin-bottom:8px;padding-left:14px}
+.mcard p{color:var(--muted);font-size:14px;padding-left:14px}
+.mcard .les{color:var(--amber);font-family:var(--mono);font-size:12px;padding-left:14px;margin-top:10px}
+
+.check{border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:14px 26px}
+.check label{display:flex;align-items:center;gap:14px;padding:15px 0;border-bottom:1px solid var(--line);cursor:pointer;font-size:16px}
+.check label:last-child{border-bottom:0}
+.check input{appearance:none;-webkit-appearance:none;width:22px;height:22px;border:1.5px solid var(--line2);border-radius:7px;flex:none;position:relative;transition:.15s}
+.check input:checked{background:var(--orange);border-color:var(--orange)}
+.check input:checked::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#0a0a0a;font-size:14px;font-weight:800}
+.check input:checked + span{color:var(--muted2);text-decoration:line-through}
+
+.final{text-align:center;border:1px solid var(--line);border-radius:24px;background:radial-gradient(700px 300px at 50% 0%,rgba(255,106,26,.12),transparent 62%),var(--surface);padding:64px 30px;position:relative;overflow:hidden}
+.final .eyebrow,.final h2,.final p,.final .ps{position:relative;z-index:1}
+.fx{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.fx .glow{position:absolute;top:-18%;left:50%;transform:translateX(-50%);width:72%;height:80%;background:radial-gradient(ellipse at center,rgba(255,106,26,.20),transparent 66%);filter:blur(26px);animation:breathe 6.5s ease-in-out infinite}
+.ember{position:absolute;bottom:-6px;border-radius:50%;background:var(--amber);box-shadow:0 0 9px 1px var(--orange);opacity:0;animation:rise linear infinite}
+@keyframes breathe{0%,100%{opacity:.5;transform:translateX(-50%) scale(.95)}50%{opacity:1;transform:translateX(-50%) scale(1.07)}}
+@keyframes rise{0%{transform:translateY(0) scale(.5);opacity:0}14%{opacity:.9}82%{opacity:.6}100%{transform:translateY(-360px) scale(1);opacity:0}}
+@media(prefers-reduced-motion:reduce){.fx .glow{animation:none}.ember{display:none}}
+/* product mockup — Claude Code workspace */
+@keyframes blink{50%{opacity:.35}}
+.dash{max-width:1060px;margin:0 auto;border:1px solid var(--line);border-radius:18px;background:#0c0c0d;box-shadow:0 50px 100px -44px rgba(0,0,0,.92),0 0 0 1px rgba(255,255,255,.02);overflow:hidden;transform:perspective(1800px) rotateX(3deg);transform-origin:center top}
+.dash .topbar{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);background:#101011}
+.dash .topbar i{width:11px;height:11px;border-radius:50%;background:#2a2a2c;display:block}
+.dash .topbar .path{font-family:var(--mono);font-size:12px;color:var(--muted2);margin-left:10px}
+.dash .topbar .live{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--orange);display:flex;align-items:center;gap:6px}
+.dash .topbar .live::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--orange);box-shadow:0 0 8px var(--orange);animation:blink 1.8s infinite}
+.dash .body{display:grid;grid-template-columns:196px 1fr 248px}
+.dash .side{border-right:1px solid var(--line);padding:16px 12px;background:#0a0a0b}
+.dash .ws{display:flex;align-items:center;gap:9px;font-weight:600;font-size:14px;margin-bottom:16px}
+.dash .ws .av{width:20px;height:20px;border-radius:6px;background:linear-gradient(135deg,var(--orange),var(--amber))}
+.dash .navi{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);padding:8px 10px;border-radius:8px;margin-bottom:2px}
+.dash .navi .g{width:15px;text-align:center;opacity:.65;font-size:12px}
+.dash .navi.on{background:rgba(255,106,26,.12);color:var(--txt)}
+.dash .navi.on .g{opacity:1;color:var(--orange)}
+.dash .navlabel{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin:16px 0 8px 10px}
+.dash .main{padding:24px 26px}
+.dash .maintag{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--orange);border:1px solid rgba(255,106,26,.3);border-radius:100px;padding:5px 12px;margin-bottom:16px}
+.dash .main h3{font-size:23px;letter-spacing:-.02em;margin-bottom:8px}
+.dash .main .msub{color:var(--muted);font-size:14px;max-width:48ch;margin-bottom:20px;line-height:1.5}
+.dash .tpl{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-bottom:10px}
+.dash .chips2{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.dash .chip2{font-family:var(--mono);font-size:12px;color:var(--txt);background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:8px;padding:7px 12px}
+.dash .rows{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.dash .row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px}
+.dash .row:last-child{border-bottom:0}
+.dash .row .rn{display:flex;align-items:center;gap:11px}
+.dash .row .ic{width:24px;height:24px;border-radius:7px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:var(--amber)}
+.dash .st{font-family:var(--mono);font-size:11px;display:flex;align-items:center;gap:6px}
+.dash .st.done{color:var(--amber)}.dash .st.act{color:var(--orange)}.dash .st.wait{color:var(--muted2)}
+.dash .st .d{width:6px;height:6px;border-radius:50%;background:currentColor}
+.dash .st.act .d{box-shadow:0 0 8px var(--orange);animation:blink 1.6s infinite}
+.dash .aside{border-left:1px solid var(--line);padding:18px 16px;background:#0a0a0b}
+.dash .ah{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.dash .ah .t{font-size:13px;font-weight:600}
+.dash .ah .m{font-family:var(--mono);font-size:10px;color:var(--orange)}
+.dash .conn{display:flex;align-items:center;gap:10px;padding:9px 0;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)}
+.dash .conn .b{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;font-weight:700;color:#0a0a0a;background:linear-gradient(135deg,var(--orange),var(--amber))}
+.dash .conn .nm{flex:1;color:var(--txt)}
+.dash .conn .ok{font-family:var(--mono);font-size:10px;color:var(--amber)}
+.dash .addc{font-family:var(--mono);font-size:11px;color:var(--muted);padding:11px 0 4px}
+.dash .metrics{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+.dash .metrics .mh{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:11px}
+.dash .mrow{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px}
+.dash .mrow b{color:var(--amber);font-family:var(--mono);font-weight:600}
+@media(max-width:860px){
+  .dash{transform:none;border-radius:14px}
+  .dash .body{grid-template-columns:1fr}
+  .dash .side,.dash .aside{display:none}
+  .dash .main{padding:20px}
+}
+/* bento — reference-style cards with icon clusters */
+.bento{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.bcard{border:1px solid var(--line);border-radius:18px;background:var(--surface);padding:26px;position:relative;overflow:hidden;transition:border-color .2s}
+.bcard:hover{border-color:rgba(255,106,26,.35)}
+.bcard .btag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);border:1px solid rgba(255,184,77,.3);border-radius:100px;padding:4px 11px;margin-bottom:14px}
+.bcard h3{font-size:20px;letter-spacing:-.02em;margin-bottom:8px}
+.bcard p{color:var(--muted);font-size:14px;max-width:42ch;margin-bottom:22px;line-height:1.5}
+.cluster{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.cluster .cb{width:52px;height:52px;border-radius:14px;background:#151515;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt);box-shadow:0 10px 22px -10px rgba(0,0,0,.8);transition:transform .25s}
+.cluster .cb.hot{background:linear-gradient(135deg,var(--orange),var(--amber));color:#0a0a0a;border-color:transparent;box-shadow:0 10px 26px -8px rgba(255,106,26,.5)}
+.bcard:hover .cluster .cb{transform:translateY(-4px)}
+.clabel{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-top:16px}
+.miniframe{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0c0c0c}
+.miniframe .mf-bar{display:flex;gap:5px;padding:9px 11px;border-bottom:1px solid var(--line);align-items:center}
+.miniframe .mf-bar i{width:7px;height:7px;border-radius:50%;background:#2a2a2c}
+.miniframe .mf-bar .u{font-family:var(--mono);font-size:10px;color:var(--muted2);margin-left:8px}
+.miniframe .mf-body{padding:16px;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.7}
+.miniframe .mf-body .lv{color:var(--orange)}
+@media(max-width:860px){.bento{grid-template-columns:1fr}}
+.final h2{font-size:clamp(28px,4vw,44px);margin-bottom:16px}
+.final p{color:var(--muted);font-size:18px;max-width:48ch;margin:0 auto 30px}
+.ps{margin-top:26px;font-size:14px;color:var(--muted2)}
+footer{padding:48px 0;text-align:center;color:var(--muted2);font-family:var(--mono);font-size:12px;border-top:1px solid var(--line)}
+/* premium transitions + stack */
+.divider{height:1px;max-width:1080px;margin:6px auto;background:linear-gradient(90deg,transparent,var(--line2) 22%,var(--line2) 78%,transparent);transform:scaleX(.2);opacity:0;transform-origin:center;position:relative}
+.divider::after{content:"";position:absolute;top:-2px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--orange);box-shadow:0 0 16px 2px var(--orange)}
+.out{display:inline-flex;align-items:center;font-family:var(--mono);font-size:12px;color:var(--amber);border:1px dashed rgba(255,184,77,.35);border-radius:8px;padding:7px 12px;margin-bottom:14px}
+.stack-cat{margin-bottom:30px}
+.cat-h{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin-bottom:16px;padding-left:2px}
+.glowtop{position:relative}
+.glowtop::before{content:"";position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:64%;height:220px;background:radial-gradient(ellipse at center,rgba(255,106,26,.09),transparent 70%);pointer-events:none}
+
+@media(max-width:860px){
+  .tgrid,.mgrid,.statgrid{grid-template-columns:1fr}
+  .statgrid{grid-template-columns:repeat(2,1fr)}
+  .step{grid-template-columns:1fr;gap:14px}
+  .step .num{width:46px;height:46px}
+  .selfref{flex-direction:column;gap:12px}
+  nav .nav-cta{display:none}
+  section{padding:72px 0}
+  .scroll3d{min-height:240vh}
+}
+</style>
+</head>
+<body>
+<!-- neuro shader adapted from 21st.dev @thanh (Interactive Neural Vortex); 3D scene inspired by 21st.dev @dhiluxui (Geometric Sphere) — both pulled via 21st.dev MCP, recolored to brand -->
+<canvas id="neuro"></canvas>
+<div id="bar"></div>
+
+<nav><div class="wrap">
+  <span class="pill"><span class="dot"></span>Claude Кодыч</span>
+  <a class="nav-cta" href="https://t.me/ClaudeCodich" target="_blank" rel="noopener">Забрать в Telegram ↗</a>
+</div></nav>
+
+<!-- HERO over shader -->
+<header class="hero">
+  <div class="hero-scrim"></div>
+  <div class="wrap hero-center">
+    <span class="eyebrow">Бесплатный гайд · Claude Кодыч</span>
+    <h1>Премиум-лендинг <span class="orange">почти без кода</span></h1>
+    <p class="sub">Не набор кнопок, а повторяемый процесс, который скармливаешь нейронке — и обходишь ошибки и слитое время. Разбираю на живом примере: на этой самой странице.</p>
+    <div class="chips">
+      <span class="chip"><b>5</b> шагов</span>
+      <span class="chip">живой фон</span>
+      <span class="chip">готовые промты</span>
+      <span class="chip">мои затыки</span>
+    </div>
+    <div class="hero-cta">
+      <a class="cta" href="#process">Разобрать процесс →</a>
+      <a class="cta ghost" href="https://t.me/ClaudeCodich" target="_blank" rel="noopener">Забрать разбор</a>
+    </div>
+    <div class="hero-credit">▲ этот фон — живой WebGL-шейдер, <b>вытащен из 21st.dev прямо в Claude по MCP</b></div>
+  </div>
+</header>
+
+<div class="below">
+
+<section><div class="wrap">
+  <div class="selfref reveal">
+    <span class="i">META</span>
+    <p><b>Этот лендинг — сам пример.</b> Ты смотришь ровно то, о чём гайд: премиум-скролл, живой шейдер на фоне, выпадание плашек, терминальные блоки. Всё собрано в Claude Code по шагам. Дочитаешь — соберёшь так же.</p>
+  </div>
+</div></section>
+
+<div class="divider"></div>
+
+<!-- PRODUCT MOCKUP: Claude Code workspace -->
+<section class="glowtop"><div class="wrap">
+  <div class="shead reveal" style="text-align:center;max-width:none;margin-bottom:36px">
+    <span class="eyebrow">Как это выглядит в работе</span>
+    <h2>Один кабинет — весь лендинг под контролем</h2>
+    <p style="margin:0 auto">Файлы, шаги, коннекторы и метрики в одном окне Claude Code. Живой пример — этой страницы.</p>
+  </div>
+  <div class="reveal">
+    <div class="dash">
+      <div class="topbar"><i></i><i></i><i></i><span class="path">claude · Guide_Landing / index.html</span><span class="live">LIVE</span></div>
+      <div class="body">
+        <div class="side">
+          <div class="ws"><span class="av"></span>Claude Кодыч ▾</div>
+          <div class="navi"><span class="g">◇</span>Проект</div>
+          <div class="navi"><span class="g">▤</span>Файлы</div>
+          <div class="navi on"><span class="g">✦</span>Сборка</div>
+          <div class="navi"><span class="g">◈</span>Скилы</div>
+          <div class="navi"><span class="g">⚡</span>Коннекторы</div>
+          <div class="navlabel">Проекты</div>
+          <div class="navi"><span class="g">›</span>Лендинг-гайд</div>
+          <div class="navi"><span class="g">›</span>Пост</div>
+          <div class="navi"><span class="g">›</span>Рилсы</div>
+        </div>
+        <div class="main">
+          <span class="maintag">✦ Сборка лендинга</span>
+          <h3>Собери премиум-лендинг по шагам</h3>
+          <p class="msub">Приноси референс — Claude собирает секцию по канону, ты докручиваешь. Под каждым этапом готовый промт.</p>
+          <div class="tpl">Готовые промты</div>
+          <div class="chips2"><span class="chip2">Разведка</span><span class="chip2">Канон</span><span class="chip2">Сборка</span><span class="chip2">Гейт качества</span><span class="chip2">Деплой</span></div>
+          <div class="tpl">Твои шаги</div>
+          <div class="rows">
+            <div class="row"><div class="rn"><span class="ic">01</span>Разведка эталонов</div><span class="st done"><span class="d"></span>готово</span></div>
+            <div class="row"><div class="rn"><span class="ic">02</span>Канон проекта</div><span class="st done"><span class="d"></span>готово</span></div>
+            <div class="row"><div class="rn"><span class="ic">03</span>Сборка секций</div><span class="st done"><span class="d"></span>готово</span></div>
+            <div class="row"><div class="rn"><span class="ic">04</span>Гейт качества</div><span class="st act"><span class="d"></span>идёт</span></div>
+            <div class="row"><div class="rn"><span class="ic">05</span>Деплой на домен</div><span class="st wait"><span class="d"></span>ждёт</span></div>
+          </div>
+        </div>
+        <div class="aside">
+          <div class="ah"><span class="t">Коннекторы · MCP</span><span class="m">управление</span></div>
+          <div class="conn"><span class="b">21</span><span class="nm">21st.dev</span><span class="ok">✓ подключён</span></div>
+          <div class="conn"><span class="b">c7</span><span class="nm">context7</span><span class="ok">✓ подключён</span></div>
+          <div class="conn"><span class="b">Pw</span><span class="nm">Playwright</span><span class="ok">✓ подключён</span></div>
+          <div class="conn"><span class="b">Ob</span><span class="nm">Obsidian</span><span class="ok">✓ подключён</span></div>
+          <div class="conn"><span class="b">No</span><span class="nm">Notion</span><span class="ok">✓ подключён</span></div>
+          <div class="conn"><span class="b">GH</span><span class="nm">GitHub</span><span class="ok">✓ подключён</span></div>
+          <div class="addc">+ добавить коннектор</div>
+          <div class="metrics">
+            <div class="mh">Импакт · эта страница</div>
+            <div class="mrow">Шагов пройдено <b>5 / 5</b></div>
+            <div class="mrow">Блок из 21st.dev <b>1</b></div>
+            <div class="mrow">Строк вёрстки руками <b>0</b></div>
+            <div class="mrow">Собрано за <b>1 вечер</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="mind reveal">
+    <h3>Главный сдвиг: ты <span class="orange">режиссёр</span>, не кодер.</h3>
+    <p>90% пишут «сделай красивый лендинг» и получают шаблон. Рабочий подход другой: ты приносишь примеры и задаёшь рамки, а сборку отдаёшь Claude Code. Он видит файлы, сам их правит, сам гоняет проверку. Ты показываешь референс и говоришь «вот так, но по-своему».</p>
+  </div>
+</div></section>
+
+<section id="process"><div class="wrap">
+  <div class="shead reveal">
+    <span class="eyebrow">Процесс · ядро гайда</span>
+    <h2>Пять шагов от пустой папки до лендинга на домене</h2>
+    <p>Один конвейер. Под каждым шагом — готовый промт: копируй и вставляй в Claude Code.</p>
+  </div>
+
+  <div class="step reveal"><div class="num">01</div><div>
+    <h3>Разведка эталонов</h3>
+    <p class="goal">Нельзя собрать «вау», если не видел «вау». Берёшь 3–4 сайта уровня студии и вытаскиваешь по одному сильному ходу на секцию. Готовые блоки можно тянуть прямо в Claude по MCP — живой нейро-фон этой страницы так и появился, из каталога 21st.dev.</p>
+      <div class="out">→ на выходе: канон + список секций, по одному ходу на каждую</div>
+    <div class="tools"><span class="tool">awwwards / godly <span>— насмотренность</span></span><span class="tool">21st.dev по MCP <span>— готовые блоки с кодом в Claude</span></span></div>
+    <div class="term"><div class="th"><span class="d"></span><span class="t">промт · разведка + канон</span><span class="copy">копировать</span></div>
+    <pre>Вот 3 сайта-эталона (ссылки/скрины). Разбери каждый:
+палитра, шрифт, ритм, и <span class="c">какой один приём</span> держит каждую секцию.
+Собери из этого мой канон и список секций — по одному ходу на каждую.
+Пока ничего не верстай.</pre></div>
+  </div></div>
+
+  <div class="step reveal"><div class="num">02</div><div>
+    <h3>Канон — рамки проекта</h3>
+    <p class="goal">Пока не зафиксируешь палитру, шрифт и ритм — каждый экран получится разным. Канон этой страницы: угольный фон, один оранжевый акцент, Geist для заголовков, моно для кода.</p>
+      <div class="out">→ на выходе: зафиксированные палитра, шрифт и ритм</div>
+    <div class="tools"><span class="tool">my-design <span>— премиум-вкус</span></span><span class="tool">calm-design <span>— ритм и воздух</span></span></div>
+    <div class="term"><div class="th"><span class="d"></span><span class="t">промт · канон</span><span class="copy">копировать</span></div>
+    <pre>Зафиксируй канон: 1 фон + 1 акцент, 1 заголовочный + 1 текстовый шрифт,
+отступы и ритм. Дальше каждую секцию собираем строго по нему.</pre></div>
+  </div></div>
+
+  <div class="step reveal"><div class="num">03</div><div>
+    <h3>Сборка — стек премиум-скролла</h3>
+    <p class="goal">Плавный скролл, появления по прокрутке, живой WebGL-фон, выпадание плашек. Claude ставит и настраивает сам — тебе важно понимать, что за что отвечает.</p>
+      <div class="out">→ на выходе: секции собраны по канону, один сильный ход на каждой</div>
+    <div class="tools"><span class="tool">Lenis <span>— плавный скролл</span></span><span class="tool">GSAP ScrollTrigger <span>— эффекты по скроллу</span></span><span class="tool">WebGL-шейдер <span>— живой фон</span></span><span class="tool">context7 <span>— свежая дока</span></span></div>
+    <div class="term"><div class="th"><span class="d"></span><span class="t">промт · секция</span><span class="copy">копировать</span></div>
+    <pre>Собери секцию строго по канону. Один сильный ход:
+<span class="c">живой фон / выпадание плашек / сборка текста</span>.
+Сделай чисто, без лишних свечений. Покажи — дальше буду докручивать.</pre></div>
+  </div></div>
+
+  <div class="step core reveal"><div class="num">04</div><div>
+    <span class="badge">Сердце гайда</span>
+    <h3>Гейт качества</h3>
+    <p class="goal">Тут рождается разница между «ИИ-поделкой» и премиумом. Проверять инструментами, а не на глаз — новички пропускают именно это, отсюда весь слоп.</p>
+      <div class="out">→ на выходе: чистый премиум без дизайн-слопа</div>
+    <div class="tools"><span class="tool">Impeccable <span>— детектор слопа</span></span><span class="tool">Playwright <span>— тест живьём</span></span><span class="tool">глиф-чек</span><span class="tool">тач-тест 390px</span><span class="tool">humanizer <span>— тексты</span></span></div>
+    <div class="term"><div class="th"><span class="d"></span><span class="t">промт · прогон качества</span><span class="copy">копировать</span></div>
+    <pre>Прогони на дизайн-слоп (Impeccable): где перебор эффектов/свечений/шрифтов.
+Проверь типографику на уровне глифов и мобилку на 390px <span class="c">реально</span>,
+не просто уменьши окно. Дай список правок по приоритету.</pre></div>
+  </div></div>
+
+  <div class="step reveal"><div class="num">05</div><div>
+    <h3>Деплой на свой домен</h3>
+    <p class="goal">Стили статикой, SEO и превью для мессенджеров, бесплатный хостинг. И проверка на проде — «задеплоил» не равно «работает».</p>
+      <div class="out">→ на выходе: живой лендинг на своём домене</div>
+    <div class="tools"><span class="tool">GitHub Pages <span>— хостинг + поддомен</span></span><span class="tool">OG / SEO <span>— превью ссылки</span></span></div>
+    <div class="term"><div class="th"><span class="d"></span><span class="t">промт · деплой + проверка</span><span class="copy">копировать</span></div>
+    <pre>Вшей стили статикой, добавь SEO/OG/favicon, задеплой на GitHub Pages.
+Потом <span class="c">открой боевую ссылку</span> на десктопе и на 390px, поскролль
+и подтверди, что всё живо. Не прошёл деплой — не говори «готово».</pre></div>
+  </div></div>
+</div></section>
+
+
+<!-- STATS -->
+<section><div class="wrap">
+  <div class="statgrid stagger">
+    <div class="stat"><div class="v" data-to="5">0</div><div class="l">шагов процесса</div></div>
+    <div class="stat"><div class="v" data-to="1">0</div><div class="l">блок из 21st.dev по MCP</div></div>
+    <div class="stat"><div class="v" data-to="0">0</div><div class="l">строк вёрстки руками</div></div>
+    <div class="stat"><div class="v" data-to="1">0</div><div class="l">вечер на сборку</div></div>
+  </div>
+</div></section>
+
+<div class="divider"></div>
+
+<!-- STACK: connectors + skills that built this page -->
+<section id="stack" class="glowtop"><div class="wrap">
+  <div class="shead reveal">
+    <span class="eyebrow">Стек этой страницы</span>
+    <h2>Чем собран этот лендинг</h2>
+    <p>Точный набор — коннекторы и скилы, которые реально включали в дело. <b style="color:var(--txt);font-weight:600">MCP</b> — это «розетки», через которые Claude тянет внешние инструменты прямо в чат.</p>
+  </div>
+
+  <div class="bento stagger">
+    <div class="bcard">
+      <span class="btag">Коннекторы · MCP</span>
+      <h3>Внешние инструменты прямо в Claude</h3>
+      <p>«Розетки» к сервисам: каталог блоков, свежая дока, реальный браузер, память. Всё в одном чате.</p>
+      <div class="cluster">
+        <div class="cb hot">21</div><div class="cb">c7</div><div class="cb">Pw</div><div class="cb">Ob</div><div class="cb">No</div><div class="cb">GH</div>
+      </div>
+      <div class="clabel">21st.dev · context7 · Playwright · Obsidian · Notion · GitHub</div>
+    </div>
+    <div class="bcard">
+      <span class="btag">Скилы Claude Code</span>
+      <h3>Готовые навыки под задачу</h3>
+      <p>Вкус, премиум-фронт, чистка дизайн-слопа и живой текст — вызываются по задаче.</p>
+      <div class="cluster">
+        <div class="cb hot">md</div><div class="cb">fd</div><div class="cb">Im</div><div class="cb">hz</div>
+      </div>
+      <div class="clabel">my-design · frontend-design · Impeccable · humanizer</div>
+    </div>
+    <div class="bcard">
+      <span class="btag">Движение и фон</span>
+      <h3>Живой фон и премиум-скролл</h3>
+      <p>WebGL-шейдер на фоне, появления и выпадание плашек по прокрутке, плавный инерционный скролл.</p>
+      <div class="cluster">
+        <div class="cb hot">GL</div><div class="cb">GS</div><div class="cb">Ln</div>
+      </div>
+      <div class="clabel">WebGL-шейдер · GSAP · Lenis</div>
+    </div>
+    <div class="bcard">
+      <span class="btag">Деплой · хостинг</span>
+      <h3>Свой домен за минуты</h3>
+      <p>Статика на GitHub Pages — бесплатно, со своим поддоменом. Ссылку не стыдно отправить.</p>
+      <div class="miniframe">
+        <div class="mf-bar"><i></i><i></i><i></i><span class="u">claudecodich.github.io</span></div>
+        <div class="mf-body"><span class="lv">● LIVE</span> · deploy: success<br>проверено на проде · desktop + 390px</div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<div class="divider"></div>
+
+<!-- MISTAKES -->
+<section><div class="wrap">
+  <div class="shead reveal">
+    <span class="eyebrow">Честные затыки</span>
+    <h2>Где я споткнулся — чтобы ты обошёл</h2>
+    <p>То, за что обычно не рассказывают. Каждый стоил времени.</p>
+  </div>
+  <div class="mgrid stagger">
+    <div class="mcard"><h4>Чужой блок был на React</h4><p>Шейдер-фон пришёл из 21st.dev как React-компонент, а страница — чистый HTML.</p><div class="les">→ бери из блока суть, переноси в свой стек руками</div></div>
+    <div class="mcard"><h4>Обрезанные хвосты букв</h4><p>Красивая маска на появлении текста рубила низ кириллицы — «д / у / р» насовсем.</p><div class="les">→ типографику смотри на уровне глифов</div></div>
+    <div class="mcard"><h4>Мобилка поехала</h4><p>Премиум-скролл и живой фон заточены под мышь: на телефоне тяжёлое плывёт.</p><div class="les">→ на тач упрощай, проверяй руками на 390px</div></div>
+    <div class="mcard"><h4>«Задеплоил» ≠ «работает»</h4><p>Деплой мог молча упасть, а я уже говорю «готово».</p><div class="les">→ всегда открывай боевую ссылку и скролль сам</div></div>
+  </div>
+</div></section>
+
+<div class="divider"></div>
+
+<!-- CHECKLIST -->
+<section><div class="wrap">
+  <div class="shead reveal"><span class="eyebrow">Чеклист</span><h2>Лендинг готов, когда</h2></div>
+  <div class="check reveal">
+    <label><input type="checkbox"><span>Собраны 3–4 эталона, выписан один ход на секцию</span></label>
+    <label><input type="checkbox"><span>Зафиксирован канон: палитра, шрифт, ритм</span></label>
+    <label><input type="checkbox"><span>Секции собраны по канону, один сильный ход на каждой</span></label>
+    <label><input type="checkbox"><span>Прогон Impeccable — слоп вычищен</span></label>
+    <label><input type="checkbox"><span>Типографика проверена на уровне глифов</span></label>
+    <label><input type="checkbox"><span>Мобилка проверена руками на 390px</span></label>
+    <label><input type="checkbox"><span>Тексты живые: humanizer + «прочитал вслух»</span></label>
+    <label><input type="checkbox"><span>Статика, SEO/OG, задеплоено и проверено на проде</span></label>
+  </div>
+</div></section>
+
+<div class="divider"></div>
+
+<!-- FINAL: thank-you + next-topic warmup -->
+<section><div class="wrap">
+  <div class="final reveal">
+    <div class="fx" aria-hidden="true">
+      <div class="glow"></div>
+      <span class="ember" style="left:6%;width:3px;height:3px;animation-duration:10s;animation-delay:-1s"></span>
+      <span class="ember" style="left:14%;width:4px;height:4px;animation-duration:12s;animation-delay:-5s"></span>
+      <span class="ember" style="left:21%;width:2px;height:2px;animation-duration:9s;animation-delay:-3s"></span>
+      <span class="ember" style="left:29%;width:3px;height:3px;animation-duration:13s;animation-delay:-8s"></span>
+      <span class="ember" style="left:37%;width:3px;height:3px;animation-duration:11s;animation-delay:-2s"></span>
+      <span class="ember" style="left:44%;width:4px;height:4px;animation-duration:14s;animation-delay:-6s"></span>
+      <span class="ember" style="left:51%;width:2px;height:2px;animation-duration:10s;animation-delay:-9s"></span>
+      <span class="ember" style="left:58%;width:3px;height:3px;animation-duration:12s;animation-delay:-4s"></span>
+      <span class="ember" style="left:65%;width:3px;height:3px;animation-duration:9s;animation-delay:-7s"></span>
+      <span class="ember" style="left:72%;width:4px;height:4px;animation-duration:13s;animation-delay:-1s"></span>
+      <span class="ember" style="left:79%;width:2px;height:2px;animation-duration:11s;animation-delay:-5s"></span>
+      <span class="ember" style="left:86%;width:3px;height:3px;animation-duration:10s;animation-delay:-8s"></span>
+      <span class="ember" style="left:92%;width:3px;height:3px;animation-duration:12s;animation-delay:-3s"></span>
+      <span class="ember" style="left:33%;width:2px;height:2px;animation-duration:15s;animation-delay:-11s"></span>
+      <span class="ember" style="left:62%;width:2px;height:2px;animation-duration:15s;animation-delay:-13s"></span>
+      <span class="ember" style="left:48%;width:4px;height:4px;animation-duration:16s;animation-delay:-6s"></span>
+    </div>
+    <span class="eyebrow">Спасибо, что ты здесь</span>
+    <h2>Обнял. Это и был полный разбор.</h2>
+    <p>Ты прошёл весь путь — от пустой папки до живого премиум-лендинга на своём домене. Дальше будет так же по делу и без воды.</p>
+    <p style="color:var(--amber);font-weight:600;max-width:44ch;margin:0 auto 8px">Следующая тема — автоматизации. Одна из моих любимых. Не пропусти.</p>
+    <div class="ps">🫶 На связи. Клод Кодыч</div>
+  </div>
+</div></section>
+
+<footer>Claude Кодыч · собрано в Claude Code · блоки — из 21st.dev по MCP</footer>
+
+</div><!-- /.below -->
+
+<script>
+const mobile=matchMedia('(max-width:860px)').matches;
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+// reading progress
+const bar=document.getElementById('bar');
+addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%'},{passive:true});
+
+// copy buttons
+document.querySelectorAll('.term').forEach(t=>{const b=t.querySelector('.copy'),p=t.querySelector('pre');
+  b.addEventListener('click',()=>navigator.clipboard.writeText(p.innerText).then(()=>{const o=b.textContent;b.textContent='скопировано ✓';setTimeout(()=>b.textContent=o,1400)}));});
+
+// checklist persistence
+document.querySelectorAll('.check input').forEach((c,i)=>{const k='guide_chk_'+i;
+  if(localStorage.getItem(k)==='1')c.checked=true;
+  c.addEventListener('change',()=>localStorage.setItem(k,c.checked?'1':'0'));});
+
+// GSAP: Lenis + reveals + stat counters + stagger drop + card tilt
+if(!reduce && window.gsap){
+  gsap.registerPlugin(ScrollTrigger);
+  if(!mobile && window.Lenis && matchMedia('(pointer:fine)').matches){
+    const lenis=new Lenis({lerp:.1});
+    function raf(t){lenis.raf(t);requestAnimationFrame(raf)}requestAnimationFrame(raf);
+    lenis.on('scroll',ScrollTrigger.update);
+  }
+  gsap.utils.toArray('.reveal').forEach(el=>gsap.to(el,{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:.9,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 86%'}}));
+  gsap.utils.toArray('.divider').forEach(d=>gsap.fromTo(d,{scaleX:.2,opacity:0},{scaleX:1,opacity:1,duration:1.1,ease:'power2.out',scrollTrigger:{trigger:d,start:'top 94%'}}));
+  gsap.utils.toArray('.stagger').forEach(gr=>gsap.fromTo(gr.children,{opacity:0,y:48,scale:.965},{opacity:1,y:0,scale:1,duration:.7,ease:'power3.out',stagger:.09,scrollTrigger:{trigger:gr,start:'top 82%'}}));
+  // stat counters
+  document.querySelectorAll('.stat .v').forEach(v=>{
+    const to=+v.dataset.to;
+    ScrollTrigger.create({trigger:v,start:'top 90%',once:true,onEnter:()=>{
+      const o={n:0};gsap.to(o,{n:to,duration:1.1,ease:'power2.out',onUpdate:()=>v.textContent=Math.round(o.n)});}});
+  });
+}else{
+  document.querySelectorAll('.reveal').forEach(el=>{el.style.opacity=1;el.style.transform='none';el.style.filter='none'});
+  document.querySelectorAll('.divider').forEach(d=>{d.style.opacity=1;d.style.transform='none'});
+  document.querySelectorAll('.stagger>*').forEach(el=>{el.style.opacity=1;el.style.transform='none'});
+  document.querySelectorAll('.stat .v').forEach(v=>v.textContent=v.dataset.to);
+}
+
+// card 3D tilt (desktop)
+if(!mobile){
+  document.querySelectorAll('.tcard').forEach(c=>{
+    c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+      c.style.transform=`perspective(700px) rotateX(${-y*6}deg) rotateY(${x*8}deg) translateY(-3px)`;});
+    c.addEventListener('pointerleave',()=>c.style.transform='');
+  });
+}
+
+// ── Neural vortex shader (vanilla WebGL) — from 21st.dev @thanh, recolored ──
+(function(){
+  const canvas=document.getElementById('neuro');if(!canvas)return;
+  if(reduce)canvas.style.opacity=.35;
+  const gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
+  if(!gl){canvas.style.display='none';return;}
+  const vs=`precision mediump float;attribute vec2 a_position;varying vec2 vUv;void main(){vUv=.5*(a_position+1.);gl_Position=vec4(a_position,0.,1.);}`;
+  const fs=`precision mediump float;varying vec2 vUv;uniform float u_time;uniform float u_ratio;uniform vec2 u_pointer;uniform float u_scroll;
+    vec2 rot(vec2 uv,float th){return mat2(cos(th),sin(th),-sin(th),cos(th))*uv;}
+    float neuro(vec2 uv,float t,float p){vec2 sa=vec2(0.);vec2 res=vec2(0.);float sc=8.;
+      for(int j=0;j<15;j++){uv=rot(uv,1.);sa=rot(sa,1.);vec2 l=uv*sc+float(j)+sa-t;sa+=sin(l)+2.4*p;res+=(.5+.5*cos(l))/sc;sc*=1.2;}return res.x+res.y;}
+    void main(){vec2 uv=.5*vUv;uv.x*=u_ratio;vec2 pt=vUv-u_pointer;pt.x*=u_ratio;float p=clamp(length(pt),0.,1.);p=.5*pow(1.-p,2.);
+      float t=.001*u_time;float n=neuro(uv,t,p);n=1.2*pow(n,3.);n+=pow(n,10.);n=max(0.,n-.5);n*=(1.-length(vUv-.5));
+      vec3 color=vec3(1.0,0.34,0.07);color=mix(color,vec3(1.0,0.66,0.24),0.34+0.16*sin(2.0*u_scroll+1.2));color+=vec3(0.34,0.06,0.0)*sin(2.0*u_scroll+1.5);color=color*n;gl_FragColor=vec4(color,n);}`;
+  function mk(s,t){const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS)){console.warn(gl.getShaderInfoLog(sh));return null;}return sh;}
+  const prog=gl.createProgram();gl.attachShader(prog,mk(vs,gl.VERTEX_SHADER));gl.attachShader(prog,mk(fs,gl.FRAGMENT_SHADER));gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(prog,'a_position');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  const uT=gl.getUniformLocation(prog,'u_time'),uR=gl.getUniformLocation(prog,'u_ratio'),uP=gl.getUniformLocation(prog,'u_pointer'),uS=gl.getUniformLocation(prog,'u_scroll');
+  function rs(){const dpr=Math.min(devicePixelRatio||1,mobile?1.5:2);canvas.width=innerWidth*dpr;canvas.height=innerHeight*dpr;gl.viewport(0,0,canvas.width,canvas.height);gl.uniform1f(uR,canvas.width/canvas.height);}
+  rs();addEventListener('resize',rs);
+  const ptr={x:innerWidth*.5,y:innerHeight*.4,tx:innerWidth*.5,ty:innerHeight*.4};
+  addEventListener('pointermove',e=>{ptr.tx=e.clientX;ptr.ty=e.clientY});
+  function frame(){ptr.x+=(ptr.tx-ptr.x)*.08;ptr.y+=(ptr.ty-ptr.y)*.08;
+    if(scrollY<innerHeight*1.2){gl.uniform1f(uT,performance.now());gl.uniform2f(uP,ptr.x/innerWidth,1-ptr.y/innerHeight);gl.uniform1f(uS,scrollY/(2*innerHeight));gl.drawArrays(gl.TRIANGLE_STRIP,0,4);}
+    requestAnimationFrame(frame);}
+  if(reduce){gl.uniform1f(uT,4000);gl.uniform2f(uP,.5,.6);gl.uniform1f(uS,0.);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);}else frame();
+})();
+
+// (3D scroll section removed — replaced by premium stagger-drop reveals between sections)
+</script>
+</body>
+</html>
